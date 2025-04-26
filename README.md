@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
@@ -5,33 +6,34 @@
     <title>অনুদান সংস্থার হিসাব ব্যবস্থাপনা</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f2f5;
-            padding: 20px;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #edf2f7;
             text-align: center;
+            padding: 20px;
         }
         h1 {
-            font-size: 28px;
-            margin-bottom: 20px;
+            font-size: 2em;
+            margin-bottom: 10px;
         }
-        input, select, button {
+        select, input, button {
+            padding: 10px;
             margin: 5px;
-            padding: 8px;
-            font-size: 16px;
+            width: 200px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
         table {
-            width: 100%;
+            width: 90%;
+            margin: 20px auto;
             border-collapse: collapse;
-            margin-top: 20px;
             background-color: white;
         }
         th, td {
-            border: 1px solid #ccc;
             padding: 10px;
-            text-align: center;
+            border: 1px solid #ddd;
         }
         th {
-            background-color: #e0e0e0;
+            background-color: #f7fafc;
         }
     </style>
 </head>
@@ -43,11 +45,11 @@
     <select id="typeInput">
         <option value="donation">অনুদান</option>
         <option value="expense">খরচ</option>
-    </select>
-    <input type="text" id="descriptionInput" placeholder="বিবরণ">
-    <input type="number" id="amountInput" placeholder="পরিমাণ">
-    <button onclick="addRecord()">যোগ করুন</button>
-    <br><br>
+    </select><br>
+
+    <input type="text" id="descriptionInput" placeholder="বিবরণ"><br>
+    <input type="number" id="amountInput" placeholder="পরিমাণ"><br>
+    <button onclick="addRecord()">যোগ করুন</button><br><br>
 
     <input type="text" id="searchInput" placeholder="অনুসন্ধান করুন...">
     <select id="filterType" onchange="filterTable()">
@@ -56,18 +58,16 @@
         <option value="expense">খরচ</option>
     </select>
 
-    <table>
+    <table id="recordTable">
         <thead>
             <tr>
                 <th>তারিখ</th>
-                <th>ধরণ</th>
+                <th>ধরন</th>
                 <th>বিবরণ</th>
                 <th>পরিমাণ (৳)</th>
             </tr>
         </thead>
-        <tbody id="recordTable">
-            <!-- রেকর্ডগুলো এখানে যোগ হবে -->
-        </tbody>
+        <tbody></tbody>
     </table>
 
     <script>
@@ -77,31 +77,44 @@
             const date = document.getElementById('dateInput').value;
             const type = document.getElementById('typeInput').value;
             const description = document.getElementById('descriptionInput').value;
-            const amount = document.getElementById('amountInput').value;
+            const amount = parseFloat(document.getElementById('amountInput').value);
 
-            if (!date || !description || !amount) {
-                alert('সব ঘর পূরণ করুন।');
+            if (!date || !description || isNaN(amount)) {
+                alert('সব তথ্য সঠিকভাবে পূরণ করুন।');
                 return;
             }
 
-            records.push({ date, type, description, amount: parseFloat(amount) });
-            filterTable();
-            
-            document.getElementById('dateInput').value = '';
+            records.push({ date, type, description, amount });
+            displayRecords();
+            clearInputs();
+        }
+
+        function clearInputs() {
             document.getElementById('descriptionInput').value = '';
             document.getElementById('amountInput').value = '';
+        }
+
+        function displayRecords() {
+            const tbody = document.getElementById('recordTable').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+            records.forEach(record => {
+                const row = tbody.insertRow();
+                row.insertCell(0).innerText = record.date;
+                row.insertCell(1).innerText = record.type === 'donation' ? 'অনুদান' : 'খরচ';
+                row.insertCell(2).innerText = record.description;
+                row.insertCell(3).innerText = record.amount.toFixed(2);
+            });
         }
 
         function filterTable() {
             const searchText = document.getElementById('searchInput').value.toLowerCase();
             const filterType = document.getElementById('filterType').value;
-            const tbody = document.getElementById('recordTable');
+            const tbody = document.getElementById('recordTable').getElementsByTagName('tbody')[0];
             tbody.innerHTML = '';
 
             records.forEach(record => {
                 if ((filterType === 'all' || record.type === filterType) &&
                     (record.description.toLowerCase().includes(searchText) || record.date.includes(searchText))) {
-                    
                     const row = tbody.insertRow();
                     row.insertCell(0).innerText = record.date;
                     row.insertCell(1).innerText = record.type === 'donation' ? 'অনুদান' : 'খরচ';
